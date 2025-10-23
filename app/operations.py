@@ -257,3 +257,20 @@ class OperationFactory:
         if not issubclass(operation_class, Operation):
             raise OperationError(name, "Operation class must inherit from Operation")
         cls._operations[name.lower()] = operation_class
+
+
+def calculate(operation_name: str, operand1: float, operand2: float) -> float:
+    """Convenience function to perform a calculation."""
+    operation = OperationFactory.create_operation(operation_name)
+    return operation.execute(operand1, operand2)
+
+
+def get_operation_symbol(operation_name: str) -> str:
+    """Get the symbol for an operation."""
+    operation = OperationFactory.create_operation(operation_name)
+    return operation.symbol
+
+
+def is_valid_operation(operation_name: str) -> bool:
+    """Check if an operation name is valid."""
+    return operation_name.lower().strip() in OperationFactory.get_available_operations()
