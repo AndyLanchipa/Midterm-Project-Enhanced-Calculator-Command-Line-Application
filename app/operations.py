@@ -214,3 +214,46 @@ class AbsoluteDifferenceOperation(Operation):
     @property
     def name(self) -> str:
         return "abs_diff"
+
+
+class OperationFactory:
+    """Factory class for creating operation instances using Factory Design Pattern."""
+    
+    _operations = {
+        "add": AddOperation,
+        "subtract": SubtractOperation,
+        "multiply": MultiplyOperation,
+        "divide": DivideOperation,
+        "power": PowerOperation,
+        "root": RootOperation,
+        "modulus": ModulusOperation,
+        "int_divide": IntegerDivideOperation,
+        "percent": PercentageOperation,
+        "abs_diff": AbsoluteDifferenceOperation,
+    }
+    
+    @classmethod
+    def create_operation(cls, operation_name: str) -> Operation:
+        """Create an operation instance by name."""
+        operation_name = operation_name.lower().strip()
+        
+        if operation_name not in cls._operations:
+            available_ops = ", ".join(cls._operations.keys())
+            raise OperationError(
+                operation_name, 
+                f"Unknown operation '{operation_name}'. Available operations: {available_ops}"
+            )
+        
+        return cls._operations[operation_name]()
+    
+    @classmethod
+    def get_available_operations(cls) -> list:
+        """Get list of available operation names."""
+        return list(cls._operations.keys())
+    
+    @classmethod
+    def register_operation(cls, name: str, operation_class: type):
+        """Register a new operation class (for extensibility)."""
+        if not issubclass(operation_class, Operation):
+            raise OperationError(name, "Operation class must inherit from Operation")
+        cls._operations[name.lower()] = operation_class
