@@ -90,3 +90,127 @@ class DivideOperation(Operation):
     @property
     def name(self) -> str:
         return "divide"
+
+
+class PowerOperation(Operation):
+    """Power/exponentiation operation."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Raise first number to the power of second."""
+        if operand1 == 0 and operand2 < 0:
+            raise OperationError("power", "Cannot raise zero to negative power")
+        
+        try:
+            result = operand1 ** operand2
+            if not math.isfinite(result):
+                raise OperationError("power", "Result is infinite or undefined")
+            return result
+        except OverflowError:
+            raise OperationError("power", "Result too large to calculate")
+    
+    @property
+    def symbol(self) -> str:
+        return "^"
+    
+    @property
+    def name(self) -> str:
+        return "power"
+
+
+class RootOperation(Operation):
+    """Root operation (nth root)."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Calculate nth root of first number."""
+        if operand2 == 0:
+            raise OperationError("root", "Root cannot be zero")
+        
+        if operand1 < 0 and operand2 % 2 == 0:
+            raise OperationError("root", "Cannot calculate even root of negative number")
+        
+        try:
+            if operand1 < 0:
+                # For odd roots of negative numbers
+                return -(abs(operand1) ** (1 / operand2))
+            else:
+                return operand1 ** (1 / operand2)
+        except (OverflowError, ZeroDivisionError):
+            raise OperationError("root", "Cannot calculate root")
+    
+    @property
+    def symbol(self) -> str:
+        return "√"
+    
+    @property
+    def name(self) -> str:
+        return "root"
+
+
+class ModulusOperation(Operation):
+    """Modulus operation (remainder)."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Calculate remainder of division."""
+        if operand2 == 0:
+            raise OperationError("modulus", "Cannot calculate modulus with zero divisor")
+        return operand1 % operand2
+    
+    @property
+    def symbol(self) -> str:
+        return "%"
+    
+    @property
+    def name(self) -> str:
+        return "modulus"
+
+
+class IntegerDivideOperation(Operation):
+    """Integer division operation (floor division)."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Perform integer division."""
+        if operand2 == 0:
+            raise OperationError("int_divide", "Cannot divide by zero")
+        return operand1 // operand2
+    
+    @property
+    def symbol(self) -> str:
+        return "//"
+    
+    @property
+    def name(self) -> str:
+        return "int_divide"
+
+
+class PercentageOperation(Operation):
+    """Percentage calculation operation."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Calculate what percentage operand1 is of operand2."""
+        if operand2 == 0:
+            raise OperationError("percent", "Cannot calculate percentage with zero base")
+        return (operand1 / operand2) * 100
+    
+    @property
+    def symbol(self) -> str:
+        return "%of"
+    
+    @property
+    def name(self) -> str:
+        return "percent"
+
+
+class AbsoluteDifferenceOperation(Operation):
+    """Absolute difference operation."""
+    
+    def execute(self, operand1: float, operand2: float) -> float:
+        """Calculate absolute difference between two numbers."""
+        return abs(operand1 - operand2)
+    
+    @property
+    def symbol(self) -> str:
+        return "abs_diff"
+    
+    @property
+    def name(self) -> str:
+        return "abs_diff"
