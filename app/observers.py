@@ -56,3 +56,55 @@ class Subject:
     def clear_observers(self) -> None:
         """Remove all observers."""
         self._observers.clear()
+
+
+class LoggingObserver(Observer):
+    """Observer that logs calculations to a file."""
+    
+    def __init__(self, logger):
+        """Initialize with a logger instance."""
+        from app.logger import CalculatorLogger
+        self.logger = logger
+    
+    def update(self, calculation: Calculation) -> None:
+        """Log the calculation when notified."""
+        self.logger.log_calculation(calculation)
+    
+    def get_observer_name(self) -> str:
+        """Get observer name."""
+        return "LoggingObserver"
+
+
+class AutoSaveObserver(Observer):
+    """Observer that automatically saves calculation history to CSV."""
+    
+    def __init__(self, history_manager):
+        """Initialize with a history manager instance."""
+        from app.history import CalculationHistory
+        self.history_manager = history_manager
+    
+    def update(self, calculation: Calculation) -> None:
+        """Auto-save history when a calculation is performed."""
+        try:
+            self.history_manager.save_to_csv()
+        except Exception as e:
+            # Don't raise exception to avoid interrupting calculation flow
+            print(f"Auto-save failed: {str(e)}")
+    
+    def get_observer_name(self) -> str:
+        """Get observer name."""
+        return "AutoSaveObserver"
+
+
+class CalculationEvent:
+    """Event class for calculation notifications."""
+    
+    def __init__(self, calculation: Calculation, event_type: str = "calculation_performed"):
+        """Initialize calculation event."""
+        self.calculation = calculation
+        self.event_type = event_type
+        self.timestamp = calculation.timestamp
+    
+    def __str__(self) -> str:
+        """String representation of the event."""
+        return f"{self.event_type}: {self.calculation}"
