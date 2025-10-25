@@ -24,6 +24,12 @@ class Operation(ABC):
     def name(self) -> str:
         """Return the name of this operation."""
         pass
+    
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """Return a description of what this operation does."""
+        pass
 
 
 class AddOperation(Operation):
@@ -40,6 +46,10 @@ class AddOperation(Operation):
     @property
     def name(self) -> str:
         return "add"
+    
+    @property
+    def description(self) -> str:
+        return "Add two numbers together"
 
 
 class SubtractOperation(Operation):
@@ -56,6 +66,10 @@ class SubtractOperation(Operation):
     @property
     def name(self) -> str:
         return "subtract"
+    
+    @property
+    def description(self) -> str:
+        return "Subtract second number from first number"
 
 
 class MultiplyOperation(Operation):
@@ -72,6 +86,10 @@ class MultiplyOperation(Operation):
     @property
     def name(self) -> str:
         return "multiply"
+    
+    @property
+    def description(self) -> str:
+        return "Multiply two numbers together"
 
 
 class DivideOperation(Operation):
@@ -90,6 +108,10 @@ class DivideOperation(Operation):
     @property
     def name(self) -> str:
         return "divide"
+    
+    @property
+    def description(self) -> str:
+        return "Divide first number by second number"
 
 
 class PowerOperation(Operation):
@@ -115,6 +137,10 @@ class PowerOperation(Operation):
     @property
     def name(self) -> str:
         return "power"
+    
+    @property
+    def description(self) -> str:
+        return "Raise first number to the power of second number"
 
 
 class RootOperation(Operation):
@@ -144,6 +170,10 @@ class RootOperation(Operation):
     @property
     def name(self) -> str:
         return "root"
+    
+    @property
+    def description(self) -> str:
+        return "Calculate nth root of first number (where n is second number)"
 
 
 class ModulusOperation(Operation):
@@ -162,6 +192,10 @@ class ModulusOperation(Operation):
     @property
     def name(self) -> str:
         return "modulus"
+    
+    @property
+    def description(self) -> str:
+        return "Calculate remainder when first number is divided by second number"
 
 
 class IntegerDivideOperation(Operation):
@@ -180,6 +214,10 @@ class IntegerDivideOperation(Operation):
     @property
     def name(self) -> str:
         return "int_divide"
+    
+    @property
+    def description(self) -> str:
+        return "Perform integer division (floor division) of first number by second number"
 
 
 class PercentageOperation(Operation):
@@ -198,6 +236,10 @@ class PercentageOperation(Operation):
     @property
     def name(self) -> str:
         return "percent"
+    
+    @property
+    def description(self) -> str:
+        return "Calculate what percentage first number is of second number"
 
 
 class AbsoluteDifferenceOperation(Operation):
@@ -214,6 +256,10 @@ class AbsoluteDifferenceOperation(Operation):
     @property
     def name(self) -> str:
         return "abs_diff"
+    
+    @property
+    def description(self) -> str:
+        return "Calculate absolute difference between two numbers"
 
 
 class OperationFactory:
