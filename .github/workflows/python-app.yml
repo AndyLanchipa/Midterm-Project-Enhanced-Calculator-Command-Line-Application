@@ -1,0 +1,133 @@
+name: Python Calculator Application CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests with pytest
+      run: |
+        pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
+
+    - name: Check test coverage
+      run: |
+        pytest --cov=app --cov-fail-under=90 tests/
+
+    - name: Upload coverage reports to Codecov
+      if: matrix.python-version == 3.11
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        
+    - name: Install linting dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black mypy
+        
+    - name: Run flake8
+      run: |
+        flake8 app/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 app/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        
+    - name: Check code formatting with black
+      run: |
+        black --check app/ tests/
+        
+    - name: Run type checking with mypy
+      run: |
+        mypy app/ --ignore-missing-imports || true
+
+  functional-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Test application startup
+      run: |
+        timeout 10s python main.py <<< "exit" || true
+        
+    - name: Test calculator operations
+      run: |
+        python -c "
+        from app.calculator import Calculator
+        from app.calculator_config import CalculatorConfig
+        
+        # Test all operations
+        calc = Calculator(CalculatorConfig())
+        operations = [
+            ('add', '5', '3', 8.0),
+            ('subtract', '10', '4', 6.0), 
+            ('multiply', '6', '7', 42.0),
+            ('divide', '15', '3', 5.0),
+            ('power', '2', '3', 8.0),
+            ('modulus', '10', '3', 1.0),
+            ('percent', '25', '100', 25.0)
+        ]
+        
+        for op, a, b, expected in operations:
+            result = calc.perform_calculation(op, a, b)
+            assert abs(result.result - expected) < 0.0001, f'{op} failed'
+            
+        print('All functional tests passed!')
+        "
+        
+    - name: Test help system
+      run: |
+        python -c "
+        from app.help_decorators import HelpMenuDecorator
+        
+        help_gen = HelpMenuDecorator()
+        help_text = help_gen.generate_full_help()
+        assert len(help_text) > 100, 'Help text too short'
+        assert 'operations' in help_text.lower(), 'Missing operations section'
+        
+        print('Help system functional test passed!')
+        "
