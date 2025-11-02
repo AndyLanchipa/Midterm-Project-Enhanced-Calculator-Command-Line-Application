@@ -5,6 +5,7 @@ from typing import List, Optional, Dict, Any
 from app.calculator import Calculator
 from app.calculator_config import CalculatorConfig
 from app.exceptions import CalculatorError, OperationError, ValidationError
+from app.help_decorators import DynamicHelpGenerator
 
 
 class CalculatorREPL:
@@ -16,6 +17,7 @@ class CalculatorREPL:
             self.config = CalculatorConfig()
             self.calculator = Calculator(self.config)
             self.running = True
+            self.help_generator = DynamicHelpGenerator(use_colors=True)
             
             # Welcome message
             print("🧮 Advanced Calculator Application")
@@ -58,7 +60,7 @@ class CalculatorREPL:
         if cmd == "exit" or cmd == "quit":
             self._handle_exit()
         elif cmd == "help":
-            self._show_help()
+            self._show_help(parts[1:])
         elif cmd == "history":
             self._show_history()
         elif cmd == "clear":
@@ -91,29 +93,21 @@ class CalculatorREPL:
         except (OperationError, ValidationError, CalculatorError) as e:
             print(f"Error: {e}")
     
-    def _show_help(self) -> None:
-        """Display help information."""
-        print("\n📖 Available Commands:")
-        print("\n🔢 Arithmetic Operations:")
-        operations = self.calculator.get_available_operations()
-        for op in operations:
-            print(f"  {op} <num1> <num2>  - Perform {op} operation")
-        
-        print("\n📚 History Commands:")
-        print("  history           - Show calculation history")
-        print("  clear             - Clear calculation history")
-        print("  undo              - Undo last calculation")
-        print("  redo              - Redo last undone calculation")
-        
-        print("\n💾 File Operations:")
-        print("  save [filename]   - Save history to file")
-        print("  load [filename]   - Load history from file")
-        
-        print("\n🔧 Other Commands:")
-        print("  info              - Show calculator information")
-        print("  help              - Show this help message")
-        print("  exit/quit         - Exit the calculator")
-        print()
+    def _show_help(self, args: List[str]) -> None:
+        """Display help information using dynamic help generator."""
+        if args and len(args) > 0:
+            # Show help for specific operation
+            operation_name = args[0].lower()
+            if operation_name in self.calculator.get_available_operations():
+                help_text = self.help_generator.generate_operation_help(operation_name)
+                print(help_text)
+            else:
+                print(f"❌ Unknown operation: {operation_name}")
+                print("Available operations:", ", ".join(self.calculator.get_available_operations()))
+        else:
+            # Show general help using dynamic decorator pattern
+            help_text = self.help_generator.generate_help()
+            print(help_text)
     
     def _show_history(self) -> None:
         """Display calculation history."""
