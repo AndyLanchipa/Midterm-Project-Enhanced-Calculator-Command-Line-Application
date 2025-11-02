@@ -17,8 +17,8 @@ class TestMainApplication:
         mock_config = MagicMock()
         mock_config.log_dir.mkdir = MagicMock()
         mock_config.history_dir.mkdir = MagicMock()
-        mock_config.log_dir.__str__ = lambda: "logs"
-        mock_config.history_dir.__str__ = lambda: "history"
+        mock_config.log_dir.__str__ = MagicMock(return_value="logs")
+        mock_config.history_dir.__str__ = MagicMock(return_value="history")
         mock_config_class.return_value = mock_config
         
         # Import and test setup_environment

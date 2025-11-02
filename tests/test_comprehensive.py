@@ -75,11 +75,11 @@ class TestLogger:
         config = CalculatorConfig()
         logger = CalculatorLogger(config)
         
-        # Test different log levels
-        logger.info("Test info message")
-        logger.warning("Test warning message")
-        logger.error("Test error message")
-        logger.debug("Test debug message")
+        # Test different log levels using correct method names
+        logger.log_info("Test info message")
+        logger.log_warning("Test warning message")
+        logger.log_error("test_op", "Test error message")
+        logger.log_debug("Test debug message")
         
         # Should not raise exceptions
         assert True
@@ -94,8 +94,10 @@ class TestObservers:
         logger = CalculatorLogger(config)
         observer = LoggingObserver(logger)
         
-        # Test update method
-        observer.update("Test calculation event")
+        # Test update method with proper Calculation object
+        from app.calculation import Calculation
+        calc = Calculation(5.0, 3.0, "add", 8.0)
+        observer.update(calc)
         # Should not raise exceptions
         assert True
     
@@ -105,8 +107,10 @@ class TestObservers:
         calculator = Calculator(config)
         observer = AutoSaveObserver(calculator)
         
-        # Test update method
-        observer.update("Test calculation event")
+        # Test update method with proper Calculation object
+        from app.calculation import Calculation
+        calc = Calculation(5.0, 3.0, "add", 8.0)
+        observer.update(calc)
         # Should not raise exceptions
         assert True
 
@@ -144,8 +148,7 @@ class TestInputValidator:
     
     def test_validate_number_valid(self):
         """Test valid number validation."""
-        config = CalculatorConfig()
-        validator = InputValidator(config)
+        validator = InputValidator(max_value=1000000.0, precision=2)
         
         result = validator.validate_number("123.45")
         assert result == 123.45
@@ -155,8 +158,7 @@ class TestInputValidator:
     
     def test_validate_number_invalid(self):
         """Test invalid number validation."""
-        config = CalculatorConfig()
-        validator = InputValidator(config)
+        validator = InputValidator(max_value=1000000.0, precision=2)
         
         with pytest.raises(ValidationError):
             validator.validate_number("not_a_number")
@@ -166,9 +168,7 @@ class TestInputValidator:
     
     def test_validate_number_range(self):
         """Test number range validation."""
-        config = CalculatorConfig()
-        config.max_input_value = 100.0
-        validator = InputValidator(config)
+        validator = InputValidator(max_value=100.0, precision=2)
         
         # Valid range
         result = validator.validate_number("50.0")
@@ -178,24 +178,23 @@ class TestInputValidator:
         with pytest.raises(ValidationError):
             validator.validate_number("150.0")
     
-    def test_validate_operation_valid(self):
-        """Test valid operation validation."""
-        config = CalculatorConfig()
-        validator = InputValidator(config)
+    def test_validate_operation_inputs_valid(self):
+        """Test valid operation input validation."""
+        validator = InputValidator(max_value=1000000.0, precision=2)
         
-        assert validator.validate_operation("add") == "add"
-        assert validator.validate_operation("multiply") == "multiply"
+        result1, result2 = validator.validate_operation_inputs("5", "3")
+        assert result1 == 5.0
+        assert result2 == 3.0
     
-    def test_validate_operation_invalid(self):
-        """Test invalid operation validation."""
-        config = CalculatorConfig()
-        validator = InputValidator(config)
+    def test_validate_operation_inputs_invalid(self):
+        """Test invalid operation input validation."""
+        validator = InputValidator(max_value=1000000.0, precision=2)
         
         with pytest.raises(ValidationError):
-            validator.validate_operation("invalid_op")
+            validator.validate_operation_inputs("invalid", "3")
         
         with pytest.raises(ValidationError):
-            validator.validate_operation("")
+            validator.validate_operation_inputs("5", "")
 
 
 class TestConfigurationEdgeCases:
@@ -255,13 +254,13 @@ class TestCalculatorIntegration:
         config = CalculatorConfig()
         calculator = Calculator(config)
         
-        # Add observers
+        # Add observers using correct method name
         logger = CalculatorLogger(config)
         log_observer = LoggingObserver(logger)
         auto_save_observer = AutoSaveObserver(calculator)
         
-        calculator.attach_observer(log_observer)
-        calculator.attach_observer(auto_save_observer)
+        calculator.attach(log_observer)
+        calculator.attach(auto_save_observer)
         
         # Perform calculation
         result = calculator.perform_calculation("add", "5", "3")
