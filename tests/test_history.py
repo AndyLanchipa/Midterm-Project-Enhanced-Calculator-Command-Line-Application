@@ -133,24 +133,24 @@ class TestCalculatorMemento:
         
         state1 = []
         state2 = [Calculation(1.0, 1.0, "add", 2.0)]
-        state3 = [Calculation(2.0, 2.0, "multiply", 4.0)]
+        state3 = [Calculation(1.0, 1.0, "add", 2.0), Calculation(2.0, 2.0, "multiply", 4.0)]
         
         manager.save_state(state1)
         manager.save_state(state2)
         manager.save_state(state3)
         
-        # Test undo
+        # Test undo - should return to state2
         previous_state = manager.undo()
         assert len(previous_state.get_history()) == 1
         
-        # Test redo
+        # Test redo - should return to state3
         next_state = manager.redo()
         assert len(next_state.get_history()) == 2
         
         # Test undo limits
-        manager.undo()
-        manager.undo()
-        no_more_undo = manager.undo()
+        manager.undo()  # back to state2
+        manager.undo()  # back to state1
+        no_more_undo = manager.undo()  # should be None
         assert no_more_undo is None
     
     def test_memento_manager_limits(self):
