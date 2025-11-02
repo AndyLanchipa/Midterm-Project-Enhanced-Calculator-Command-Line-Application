@@ -3,7 +3,13 @@
 import os
 from pathlib import Path
 from typing import Optional
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    DOTENV_AVAILABLE = True
+except ImportError:
+    DOTENV_AVAILABLE = False
+    def load_dotenv():
+        pass
 from app.exceptions import ConfigurationError
 
 
