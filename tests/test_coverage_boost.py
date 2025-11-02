@@ -119,7 +119,7 @@ class TestHistoryExtended:
             calc = Calculation(5.0, 3.0, "add", 8.0)
             history.add_calculation(calc)
             
-            assert len(history.get_history()) == 1
+            assert len(history.get_all_calculations()) == 1
     
     def test_history_save_load_errors(self):
         """Test history save/load error handling."""
@@ -130,9 +130,10 @@ class TestHistoryExtended:
         result = history.load_from_csv("nonexistent.csv")
         assert result == False
         
-        # Test saving to invalid location
-        invalid_path = "/invalid/path/test.csv"
-        result = history.save_to_csv(invalid_path)
+        # Test saving to invalid location (use Path object)
+        from pathlib import Path
+        invalid_path = Path("/invalid/path/test.csv")
+        result = history.save_to_csv(str(invalid_path))
         assert result == False
     
     def test_history_max_size_limit(self):
@@ -147,7 +148,7 @@ class TestHistoryExtended:
             history.add_calculation(calc)
         
         # Should only keep last 3
-        assert len(history.get_history()) == 3
+        assert len(history.get_all_calculations()) == 3
 
 
 class TestConfigurationExtended:
@@ -196,15 +197,16 @@ class TestErrorHandlingExtended:
     
     def test_operation_error_details(self):
         """Test operation error with details."""
-        error = OperationError("divide", "Division by zero", 10.0, 0.0)
+        error = OperationError("divide", "Division by zero")
         assert "divide" in str(error)
         assert "Division by zero" in str(error)
     
     def test_validation_error_details(self):
         """Test validation error with details."""
         error = ValidationError("abc", "Not a number")
-        assert "abc" in str(error)
         assert "Not a number" in str(error)
+        assert hasattr(error, 'input_value')
+        assert error.input_value == "abc"
     
     def test_configuration_error(self):
         """Test configuration error."""

@@ -266,11 +266,11 @@ class TestCalculatorIntegration:
         result = calculator.perform_calculation("add", "5", "3")
         assert result.result == 8.0
         
-        # Test undo/redo
-        calculator.undo_last_calculation()
+        # Test undo/redo using correct method names
+        calculator.undo()
         assert len(calculator.get_history()) == 0
         
-        calculator.redo_last_calculation()
+        calculator.redo()
         assert len(calculator.get_history()) == 1
     
     def test_calculator_error_handling(self):
