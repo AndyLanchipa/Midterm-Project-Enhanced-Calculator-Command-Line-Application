@@ -4,8 +4,14 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Callable
 from functools import wraps
 from app.operations import OperationFactory
-import colorama
-from colorama import Fore, Style, Back
+
+# Make colorama optional
+try:
+    import colorama
+    from colorama import Fore, Style, Back
+    COLORAMA_AVAILABLE = True
+except ImportError:
+    COLORAMA_AVAILABLE = False
 
 
 class HelpSection(ABC):
