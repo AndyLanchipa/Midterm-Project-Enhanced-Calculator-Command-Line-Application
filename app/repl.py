@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 from app.calculator import Calculator
 from app.calculator_config import CalculatorConfig
 from app.exceptions import CalculatorError, OperationError, ValidationError
-from app.help_decorators import DynamicHelpGenerator
+from app.help_decorators import HelpMenuDecorator, DynamicHelpMixin
 
 
 class CalculatorREPL:
@@ -17,7 +17,7 @@ class CalculatorREPL:
             self.config = CalculatorConfig()
             self.calculator = Calculator(self.config)
             self.running = True
-            self.help_generator = DynamicHelpGenerator(use_colors=True)
+            self.help_generator = HelpMenuDecorator()
             
             # Welcome message
             print("🧮 Advanced Calculator Application")
@@ -94,20 +94,27 @@ class CalculatorREPL:
             print(f"Error: {e}")
     
     def _show_help(self, args: List[str]) -> None:
-        """Display help information using dynamic help generator."""
+        """Display help information using dynamic help decorator."""
         if args and len(args) > 0:
-            # Show help for specific operation
-            operation_name = args[0].lower()
-            if operation_name in self.calculator.get_available_operations():
-                help_text = self.help_generator.generate_operation_help(operation_name)
+            # Show help for specific section
+            section_name = args[0].lower()
+            try:
+                help_text = self.help_generator.generate_section_help(section_name)
                 print(help_text)
-            else:
-                print(f"❌ Unknown operation: {operation_name}")
-                print("Available operations:", ", ".join(self.calculator.get_available_operations()))
+            except Exception:
+                print(f"❌ Unknown help section: {section_name}")
+                print("Available sections: operations, history, file, system")
         else:
             # Show general help using dynamic decorator pattern
-            help_text = self.help_generator.generate_help()
-            print(help_text)
+            try:
+                help_text = self.help_generator.generate_full_help()
+                print(help_text)
+            except Exception as e:
+                # Fallback to basic help if decorator fails
+                print("📖 Basic Calculator Help")
+                print("Available operations:", ", ".join(self.calculator.get_available_operations()))
+                print("Type: <operation> <num1> <num2>")
+                print("Commands: history, clear, undo, redo, save, load, info, exit")
     
     def _show_history(self) -> None:
         """Display calculation history."""
