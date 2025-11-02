@@ -1,7 +1,12 @@
 """History management for calculator calculations."""
 
 from typing import List, Optional, Iterator
-import pandas as pd
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    pd = None
 from pathlib import Path
 from app.calculation import Calculation
 from app.calculator_memento import MementoManager
@@ -84,6 +89,9 @@ class CalculationHistory:
     
     def save_to_csv(self, file_path: Optional[Path] = None) -> None:
         """Save history to CSV file using pandas."""
+        if not PANDAS_AVAILABLE:
+            raise OperationError("save_history", "pandas is required for CSV operations")
+            
         if file_path is None:
             file_path = self.config.history_file
         
@@ -111,6 +119,9 @@ class CalculationHistory:
     
     def load_from_csv(self, file_path: Optional[Path] = None) -> None:
         """Load history from CSV file using pandas."""
+        if not PANDAS_AVAILABLE:
+            raise OperationError("load_history", "pandas is required for CSV operations")
+            
         if file_path is None:
             file_path = self.config.history_file
         

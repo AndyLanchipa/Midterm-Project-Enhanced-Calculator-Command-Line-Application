@@ -10,8 +10,16 @@ try:
     import colorama
     from colorama import Fore, Style, Back
     COLORAMA_AVAILABLE = True
+    colorama.init()  # Initialize colorama
 except ImportError:
     COLORAMA_AVAILABLE = False
+    # Fallback color codes (empty strings)
+    class Fore:
+        CYAN = GREEN = YELLOW = RED = BLUE = MAGENTA = WHITE = ""
+    class Style:
+        RESET_ALL = BRIGHT = ""
+    class Back:
+        RED = GREEN = BLUE = ""
 
 
 class HelpSection(ABC):
@@ -130,7 +138,8 @@ class HelpMenuDecorator:
     
     def __init__(self):
         """Initialize help menu decorator."""
-        colorama.init()  # Initialize colorama for cross-platform color support
+        if COLORAMA_AVAILABLE:
+            colorama.init()  # Initialize colorama for cross-platform color support
         self.sections: Dict[str, HelpSection] = {}
         self._register_default_sections()
     
